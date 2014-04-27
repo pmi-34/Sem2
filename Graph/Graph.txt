@@ -1,0 +1,53 @@
+Procedure AddNode(var graph:refnode; n,x:integer);
+ Var r:refnode;
+begin new(p); p^.id:=n; p^.infnode:=x; p^.arclist:=nil;
+    p^.next:=graph; graph:=p; end;
+Procedure AddArc(u,v:refnode; y:integer);
+ Var a:refarc;
+ begin If u=nil or v=nil then writeln('ошибка') else
+    begin new(a); a^.infarc:=y; a^.adj:=v; 
+        a^.next:=u^.arclist; u^.arclist:=a; end; end;
+Procedure DeleteArc(u,v:refnode);
+ Var a,b:refarc; run:boolean;
+ begin If u<>nil then begin a:=u^.arclist; run:=false;
+   While a<>nil and run do If a^.adj=v then run:=true
+     else begin b:=a; a:=a^.next; end;
+If a<>nil then begin If a=u^.arclist then 
+  u^.arclist:=a^.next else b^.next:=a^.next; dispose(a);
+ end; end; end;
+
+Procedure DeleteNode(var graph:refnode;v:refnode);
+Var p,q:refnode; a,aft:refarc;
+ begin p:=graph; While p<>nil do begin q:=p^.next;
+If p<>v then DeleteArc(p,v) else begin
+  If p=graph then graph:=q;     a:=p^.arclist;
+   While a<>nil do begin aft:=a^.next; dispose(a);
+     a:=aft; end;   dispose(p); end; p:=q; end; end;
+Procedure BrowseGr(graph:refnode);
+ Var a:refarc; Nn,Na:integer;
+ begin Nn:=0; Na:=0; While graph<>nil do begin
+   writeln('верш.',graph^.id,'с весом',graph^.infnode);
+   writeln('список дуг:'); a:=graph^.arclist;
+If a=nil then writeln('пуст') While a<>nil do begin
+writeln('к верш.:',(a^.adj)^.id,',вес дуги',a^.infarc);
+Na:=Na+1; a:=a^.next; end; Nn:=Nn+1; 
+graph:=graph^.next; end; writeln('вер.:',Nn,'дуг:',Na);
+ end;
+
+type nlist=^el; el=record id:integer; 
+	nd:refnode; nxt:nlist; end;
+function FindN(graph:refnode; x:integer):nlist;
+ Var head,p:nlist;
+ begin head:=nil; while graph<>nil do begin
+     If graph^.infnode=x then begin new(p);
+ p^.id:=graph^.id; p^.nd:=graph; p^.nxt:=head;
+ head:=p; end; graph:=graph^.next; end;
+FindN:=head; end;
+Procedure RSet(graph,u:refnode; var R:nlist);
+ Var a:refarc; v:refnode; nb:boolean; p:nlist;
+ begin a:=u^.arclist; while a<>nil do begin
+  v:=a^.adj; p:=R; nb:=true; While p<>nil 
+ and nb do If p^.nd=v then nb:=false else
+ p:=p^.next; If nb then begin new(p); 
+p^.id:=v^.id; p^.nd:=v; p^.nxt:=R; R:=p; RSet(v);
+end; a:=a^.next; end; end;
