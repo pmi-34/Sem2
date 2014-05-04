@@ -145,14 +145,15 @@ begin
   end;
 end;
 
-procedure TopoSortL(var G : PVertex);
+// Найти вершины нулевой степени
+procedure FindNullL(G : PVertex; var X : VSet);
 var
-  Q,P,Prev : PVertex;
+  P,Q : PVertex;
   A : PArc;
   F : boolean;
 begin
+  X := [];
   Q := G;
-  Prev := nil;
   while (Q <> nil) do begin
     P := G;
     // Нужно не найти ни одной входящей дуги
@@ -169,16 +170,43 @@ begin
       
     if (not F) then begin
       write(Q^.id);
-      if (Prev <> nil) then
-        Prev^.Next := Q^.Next
-      else
-        G := Q^.Next;
-      DeleteNode(Q);
-      Q := G;
-      Prev := nil;
-    end else begin
-      Prev := Q;
-      Q := Q^.Next;
+      X += [Q^.id];
+    end;
+    
+    Q := Q^.Next;
+    end;
+end;
+
+procedure TopoSortL(var G : PVertex);
+var
+  X : VSet;
+  Q,P,A : PVertex;
+  i : integer;
+begin
+  while (G <> nil) do begin
+    X := [];
+    FindNullL(G, X);
+    
+    Q := G;
+    P := nil;
+    
+    while (Q <> nil) do begin
+      if (Q^.id in X) then begin
+        A := Q^.Next;
+        DeleteNode(Q);
+        Q := A;
+        
+        if (P <> nil) then
+          P^.Next := A
+        else
+          G := A;
+          
+        Q := G;
+        P := nil;
+      end else begin
+        P := Q;
+        Q := Q^.Next;
+      end;
     end;
   end;
 end;
@@ -232,43 +260,52 @@ begin
   end;
 end;
 
+procedure FindNullM(var M : MGraph; N : integer; var X : VSet);
+var
+  i,j : integer;
+  F : boolean;
+begin
+  // Ищем вершину без входящих дуг и входящую в X
+  i := 0;
+  F := false;
+  while (i < N) do begin
+    inc(i);
+    j := 1;
+    F := true; // Нет входящих дуг
+    while ((j <= N) AND (F)) do begin
+      if (M[i,j] < 0) then
+        F := false;
+      inc(j);
+    end;
+    
+    if (F) then begin
+      X += [i];
+      write(i);
+    end;
+  end;
+ end;
+
 procedure TopoSortM(var M : MGraph; N : integer);
 var
   X : VSet;
   i,j : integer;
-  F : boolean;
 begin
-  for i := 1 to N do
-    X += [i];
+  repeat
+    X := [];
+    FindNullM(M, N, X);
     
-  while (X <> []) do begin
-    // Ищем вершину без входящих дуг и входящую в X
-    i := 0;
-    F := false;
-    while ((i < N) AND (not F)) do begin
-      inc(i);
-      if (i in X) then begin
-        j := 1;
-        F := true; // Нет входящих дуг
-        while ((j <= N) AND (F)) do begin
-          if (M[i,j] < 0) then
-            F := false;
-          inc(j);
+    if (X <> []) then
+      for i := 1 to N do begin 
+        if (i in X) then begin
+          // Удаляем ребра, исходящие из вершины
+          for j := 1 to N do
+            M[j,i] := 0;
+            // А теперь поставим ребро из вершины в самое себя
+            // Таким образом мы снизим время исполнения алгоритма
+            M[i,i] := -1;
         end;
-      end;
     end;
-    
-    if (F) then begin
-      // Удаляем ребра, исходящие из вершины
-      for j := 1 to N do
-        M[j,i] := 0;
-      // А теперь поставим ребро из вершины 1 в нашу
-      // Таким образом мы снизим время исполнения алгоритма
-      M[i,1] := -1;
-      X -= [i];
-      write(i);
-    end;
-  end;
+  until X = [];
 end;
 
 var
@@ -286,4 +323,3 @@ begin
   DumpGraphL(G);
   TopoSortL(G);
 end.
-
