@@ -1,0 +1,422 @@
+% Generator: GNU source-highlight, by Lorenzo Bettini, http://www.gnu.org/software/src-highlite
+\noindent
+\mbox{}\textbf{program}\ \textbf{Ind2}\ (input,\ output); \\
+\mbox{} \\
+\mbox{}\textit{\{\$DEFINE\ DEBUG\}} \\
+\mbox{} \\
+\mbox{}\textbf{uses} \\
+\mbox{}\ \ StackUtil,\ SysUtils; \\
+\mbox{} \\
+\mbox{}\textit{\{Определяет,\ является\ ли\ аргумент\ числом\}} \\
+\mbox{}\textbf{function}\ \textbf{isdigit}(X\ :\ char)\ :\ boolean; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ isdigit\ :=\ (X\ \textgreater{}=\ \texttt{'0'})\ \textbf{AND}\ (X\ \textless{}=\ \texttt{'9'}); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Определяет,\ является\ ли\ аргумент\ символом\}} \\
+\mbox{}\textbf{function}\ \textbf{isalpha}(X\ :\ char)\ :\ boolean; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ isalpha\ :=\ (\textbf{upcase}(X)\ \textgreater{}=\ \texttt{'A'})\ \textbf{AND}\ (\textbf{upcase}(X)\ \textless{}=\ \texttt{'Z'}); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Переводит\ часть\ строки\ в\ число\}} \\
+\mbox{}\textbf{function}\ \textbf{GetN}(S\ :\ string;\ \textbf{var}\ I\ :\ integer)\ :\ integer; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ R\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ R\ :=\ 0; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{while}\ ((I\ \textless{}=\ \textbf{length}(S))\ \textbf{AND}\ \textbf{isdigit}(S[i]))\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ R\ :=\ R*10\ +\ \textbf{ord}(S[I])\ -\ \$30;\ \textit{//\ ord('0');} \\
+\mbox{}\ \ \ \ \textbf{inc}(I); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ GetN\ :=\ R; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Создание\ дерева\ из\ инфиксной\ записи\}} \\
+\mbox{}\textbf{procedure}\ \textbf{CreateInfixTree}(\textbf{var}\ Root\ :\ PNode;\ S\ :\ string); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ Queue,\ \textit{\{голова\ очереди\}} \\
+\mbox{}\ \ QEnd,\ \textit{\{хвост\ очереди\}} \\
+\mbox{}\ \ Last\ \textit{\{последний\ распознанный\ элемент\}} \\
+\mbox{}\ \ :\ PNode; \\
+\mbox{} \\
+\mbox{}\ \ \textit{\{Добавление\ элемента\ в\ очередь\}} \\
+\mbox{}\ \ \textbf{procedure}\ \textbf{AddToQueue}(P\ :\ PNode); \\
+\mbox{}\ \ \textbf{var} \\
+\mbox{}\ \ \ \ Q\ :\ PNode; \\
+\mbox{}\ \ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{if}\ (Queue\ =\ nil)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ Queue\ :=\ P; \\
+\mbox{}\ \ \ \ \ \ QEnd\ :=\ P; \\
+\mbox{}\ \ \ \ \textbf{end}\ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ QEnd\textasciicircum{}.Next\ :=\ P; \\
+\mbox{}\ \ \ \ \ \ QEnd\ :=\ P; \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ \textit{\{Создание\ узла\ дерева\}} \\
+\mbox{}\ \ \textbf{function}\ \textbf{Build}(Data\ :\ integer;\ T\ :\ RType)\ :\ PNode; \\
+\mbox{}\ \ \textbf{var} \\
+\mbox{}\ \ \ \ Q\ :\ PNode; \\
+\mbox{}\ \ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{New}(Q); \\
+\mbox{}\ \ \ \ Q\textasciicircum{}.Next\ :=\ nil; \\
+\mbox{}\ \ \ \ Q\textasciicircum{}.Left\ :=\ nil; \\
+\mbox{}\ \ \ \ Q\textasciicircum{}.Right\ :=\ nil; \\
+\mbox{}\ \ \ \ Q\textasciicircum{}.Data\ :=\ Data; \\
+\mbox{}\ \ \ \ Q\textasciicircum{}.T\ :=\ T; \\
+\mbox{}\ \ \ \ Last\ :=\ Q; \\
+\mbox{}\ \ \ \ Build\ :=\ Q; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ i\ :\ integer; \\
+\mbox{}\ \ Q\ :\ PNode; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ i\ :=\ 1; \\
+\mbox{}\ \ Queue\ :=\ nil; \\
+\mbox{}\ \ QEnd\ :=\ nil; \\
+\mbox{}\ \ Last\ :=\ nil; \\
+\mbox{} \\
+\mbox{}\ \ ResetStack; \\
+\mbox{} \\
+\mbox{}\ \ \textit{\{Преобразование\ выразения\ в\ обратную\ польскую\ запись\}} \\
+\mbox{}\ \ \textbf{while}\ ((i\ \textless{}=\ \textbf{Length}(S))\ \textbf{and}\ \textbf{not}\ IsError)\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textit{\{Пропустим\ пробелы\}} \\
+\mbox{}\ \ \ \ \textbf{if}\ (S[i]\ \textless{}\textgreater{}\ \texttt{'\ '})\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \textit{\{После\ символа\ переменной\ должен\ быть\ только\ знак\ или\ конец\ строки\}} \\
+\mbox{}\ \ \ \ \ \ \textbf{if}\ (Last\ \textless{}\textgreater{}\ nil)\ \textbf{and}\ (Last\textasciicircum{}.T\ =\ Variable)\ \textbf{and}\ (\textbf{isdigit}(S[i])\ \textbf{or} \\
+\mbox{}\ \ \ \ \ \ \textbf{isalpha}(S[i])\ \textbf{or}\ (S[i]\ =\ \texttt{'('}))\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{Error}(\texttt{'Неправильное\ задание\ переменной'},\ S,\ i) \\
+\mbox{}\ \ \ \ \ \ \textit{\{Добавим\ число\ в\ очередь\}} \\
+\mbox{}\ \ \ \ \ \ \textbf{else}\ \textbf{if}\ \textbf{isdigit}(S[i])\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{AddToQueue}(\textbf{Build}(\textbf{GetN}(S,\ I),\ Constant)); \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{dec}(i); \\
+\mbox{}\ \ \ \ \ \ \textbf{end} \\
+\mbox{}\ \ \ \ \ \ \textit{\{Добавим\ переменную\ в\ очередь\}} \\
+\mbox{}\ \ \ \ \ \ \textbf{else}\ \textbf{if}\ \textbf{isalpha}(S[i])\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{AddToQueue}(\textbf{Build}(\textbf{ord}(S[i]),\ Variable)) \\
+\mbox{}\ \ \ \ \ \ \textit{\{Кладем\ в\ стек\ скобку\}} \\
+\mbox{}\ \ \ \ \ \ \textbf{else}\ \textbf{if}\ (S[i]\ =\ \texttt{'('})\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{Push}(\textbf{Build}(0,\ Bracket)) \\
+\mbox{}\ \ \ \ \ \ \textit{\{Извлекаем\ из\ стека\ все\ до\ открывающей\ скобки\}} \\
+\mbox{}\ \ \ \ \ \ \textbf{else}\ \textbf{if}\ (S[i]\ =\ \texttt{')'})\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ Q\ :=\ Pop; \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{while}\ (Q\ \textless{}\textgreater{}\ nil)\ \textbf{AND}\ (Q\textasciicircum{}.T\ \textless{}\textgreater{}\ Bracket)\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{AddToQueue}(Q); \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ Q\ :=\ Pop; \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{if}\ (Q\ =\ nil)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{Error}(\texttt{'В\ выражении\ несбалансированы\ скобки'},\ S,\ I) \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{Dispose}(Q);\ \textit{//\ Q\textasciicircum{}.T\ =\ Bracket} \\
+\mbox{}\ \ \ \ \ \ \textbf{end} \\
+\mbox{}\ \ \ \ \ \ \textit{\{Извлекаем\ все\ операции\ того\ же\ приоритета\}} \\
+\mbox{}\ \ \ \ \ \ \textbf{else}\ \textbf{if}\ ((S[i]\ =\ \texttt{'*'})\ \textbf{or}\ (S[i]\ =\ \texttt{'/'}))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{while}\ ((\textbf{not}\ IsClear)\ \textbf{AND}\  \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ((ReadTop\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'*'}))\ \textbf{OR}\ (ReadTop\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'/'}))))\ \textbf{do} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{AddToQueue}(Pop); \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{Push}(\textbf{Build}(\textbf{ord}(S[i]),\ Operation)); \\
+\mbox{}\ \ \ \ \ \ \textbf{end} \\
+\mbox{}\ \ \ \ \ \ \textit{\{Извлекаем\ все\ операции\ того\ же\ или\ более\ высокого\ приоритета\}} \\
+\mbox{}\ \ \ \ \ \ \textbf{else}\ \textbf{if}\ ((S[i]\ =\ \texttt{'+'})\ \textbf{or}\ (S[i]\ =\ \texttt{'-'}))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{if}\ ((S[i]\ =\ \texttt{'-'})\ \textbf{and}\  \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ ((Last\ =\ nil)\ \textbf{or}\ (Last\textasciicircum{}.T\ =\ Bracket)\ \textbf{or}\ (Last\textasciicircum{}.T\ =\ Operation)))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \textit{\{Минус\ унарный,\ ничего\ не\ извлекаем\ -\ просто\ добавим\ 0\ перед\ ним\}} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \textbf{AddToQueue}(\textbf{Build}(0,\ Constant)); \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{end}\ \textbf{else}\ \textbf{while}\ ((\textbf{not}\ IsClear)\ \textbf{AND} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ ((ReadTop\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'*'}))\ \textbf{or} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ (ReadTop\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'+'}))\ \textbf{or} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ (ReadTop\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'-'}))\ \textbf{or} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ (ReadTop\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'/'})) \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ ))\ \textbf{do} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{AddToQueue}(Pop);\ \ \ \  \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{Push}(\textbf{Build}(\textbf{ord}(S[i]),\ Operation)); \\
+\mbox{}\ \ \ \ \ \ \textbf{end}\ \textbf{else}\ \textit{\{Нераспознанный\ символ\}} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{Error}(\texttt{'Неизвестный\ символ'},\ S,\ I); \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \ \ \textbf{inc}(i); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ I\ :=\ 0; \\
+\mbox{}\ \ \textit{\{Извлечем\ из\ стека\ оставшиеся\ элементы\}} \\
+\mbox{}\ \ \textbf{while}\ (\textbf{not}\ IsClear)\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ Q\ :=\ Pop; \\
+\mbox{}\ \ \ \ \textbf{if}\ (Q\ \textless{}\textgreater{}\ nil)\ \textbf{and}\ (Q\textasciicircum{}.T\ =\ Bracket)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{Error}(\texttt{'В\ выражении\ не\ закрыты\ скобки'},\ \texttt{''},\ I) \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \textbf{AddToQueue}(Q); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ \textit{\{\$IFDEF\ DEBUG\}} \\
+\mbox{}\ \ Q\ :=\ Queue; \\
+\mbox{}\ \ \textbf{while}\ (Q\ \textless{}\textgreater{}\ nil)\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{if}\ (Q\textasciicircum{}.T\ =\ Operation)\ \textbf{OR}\ (Q\textasciicircum{}.T\ =\ Variable)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{write}\ (\textbf{chr}(Q\textasciicircum{}.Data),\ \texttt{'\ '}) \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \textbf{write}(Q\textasciicircum{}.Data,\ \texttt{'\ '}); \\
+\mbox{} \\
+\mbox{}\ \ \ \ Q\ :=\ Q\textasciicircum{}.Next; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{writeln}; \\
+\mbox{}\ \ \textit{\{\$ENDIF\}} \\
+\mbox{}\ \  \\
+\mbox{}\ \ \textit{\{Если\ польская\ запись\ успешно\ составлена,\ строим\ дерево\}} \\
+\mbox{}\ \ \textbf{if}\ (\textbf{not}\ IsError)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textit{\{Строим\ дерево\}} \\
+\mbox{}\ \ \ \ Q\ :=\ Queue; \\
+\mbox{}\ \ \ \ \textbf{while}\ (Q\ \textless{}\textgreater{}\ nil)\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \textbf{if}\ (Q\textasciicircum{}.T\ =\ Operation)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ Q\textasciicircum{}.Right\ :=\ Pop; \\
+\mbox{}\ \ \ \ \ \ \ \ Q\textasciicircum{}.Left\ :=\ Pop; \\
+\mbox{}\ \ \ \ \ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \textbf{Push}(Q); \\
+\mbox{}\ \ \ \  \\
+\mbox{}\ \ \ \ \ \ Q\ :=\ Q\textasciicircum{}.Next; \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ \ \ Root\ :=\ Pop; \\
+\mbox{}\ \ \textbf{end}\ \textbf{else} \\
+\mbox{}\ \ \ \ Root\ :=\ nil; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Вывод\ дерева\ на\ боку,\ зеркально-симметричный\ обратный\ обход,\ RNL\}} \\
+\mbox{}\textbf{procedure}\ \textbf{DumpTree}(P\ :\ PNode;\ L\ :\ integer); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (P\ \textless{}\textgreater{}\ nil)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{DumpTree}(P\textasciicircum{}.Right,\ L+1); \\
+\mbox{}\ \ \ \ \textbf{if}\ (P\textasciicircum{}.T\ =\ Operation)\ \textbf{OR}\ (P\textasciicircum{}.T\ =\ Variable)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{writeln}(\texttt{'\ '}:L*4,\ \textbf{chr}(P\textasciicircum{}.Data)\ :\ 2) \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \textbf{writeln}(\texttt{'\ '}:L*4,\ P\textasciicircum{}.Data\ :\ 2); \\
+\mbox{}\ \ \ \ \textbf{DumpTree}(P\textasciicircum{}.Left,\ L+1); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Освобождение\ памяти,\ концевой\ обход,\ LRN\}} \\
+\mbox{}\textbf{procedure}\ \textbf{FreeTree}(\textbf{var}\ Root\ :\ PNode); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (Root\ \textless{}\textgreater{}\ nil)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{FreeTree}(Root\textasciicircum{}.Left); \\
+\mbox{}\ \ \ \ \textbf{FreeTree}(Root\textasciicircum{}.Right); \\
+\mbox{}\ \ \ \ \textbf{Dispose}(Root); \\
+\mbox{}\ \ \ \ Root\ :=\ nil; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Копирование\ дерева,\ прямой\ обход,\ NLR\}} \\
+\mbox{}\textbf{procedure}\ \textbf{CopyTree}(Root\ :\ PNode;\ \textbf{var}\ NewRoot\ :\ PNode); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (Root\ \textless{}\textgreater{}\ nil)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{New}(NewRoot); \\
+\mbox{}\ \ \ \ NewRoot\textasciicircum{}.Data\ :=\ Root\textasciicircum{}.Data; \\
+\mbox{}\ \ \ \ NewRoot\textasciicircum{}.T\ :=\ Root\textasciicircum{}.T; \\
+\mbox{}\ \ \ \ \textbf{CopyTree}(Root\textasciicircum{}.Left,\ NewRoot\textasciicircum{}.Left); \\
+\mbox{}\ \ \ \ \textbf{CopyTree}(Root\textasciicircum{}.Right,\ NewRoot\textasciicircum{}.Right); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Ради\ чего\ все\ и\ затевалось\ -\ упрощение\ выражения\}} \\
+\mbox{}\textbf{procedure}\ \textbf{Simplify}(\textbf{var}\ Root\ :\ PNode); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ Q\ :\ PNode; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (Root\ \textless{}\textgreater{}\ nil)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{Simplify}(Root\textasciicircum{}.Left); \\
+\mbox{}\ \ \ \ \textbf{Simplify}(Root\textasciicircum{}.Right); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textbf{if}\ ((Root\textasciicircum{}.T\ =\ Operation)\ \textbf{and}\ (Root\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'*'})))\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{if}\ ((Root\textasciicircum{}.Left\ \textless{}\textgreater{}\ nil)\ \textbf{and}\ (Root\textasciicircum{}.Left\textasciicircum{}.T\ =\ Operation)\ \textbf{and} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ ((Root\textasciicircum{}.Left\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'+'}))\ \textbf{or}\ (Root\textasciicircum{}.Left\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'-'})))) \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textit{\{Мы\ в\ узле-операции\ умножения,\ левый\ потомок\ -\ сложение\}} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{New}(Q); \\
+\mbox{}\ \ \ \ \ \ \ \ Q\textasciicircum{}.T\ :=\ Operation; \\
+\mbox{}\ \ \ \ \ \ \ \ Q\textasciicircum{}.Data\ :=\ \textbf{ord}(\texttt{'*'}); \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{CopyTree}(Root\textasciicircum{}.Right,\ Q\textasciicircum{}.Right); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \ \ Q\textasciicircum{}.Left\ :=\ Root\textasciicircum{}.Left\textasciicircum{}.Right; \\
+\mbox{}\ \ \ \ \ \ \ \ Root\textasciicircum{}.Left\textasciicircum{}.Right\ :=\ Root\textasciicircum{}.Right; \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \ \ Root\textasciicircum{}.Data\ :=\ Root\textasciicircum{}.Left\textasciicircum{}.Data; \\
+\mbox{}\ \ \ \ \ \ \ \ Root\textasciicircum{}.Left\textasciicircum{}.Data\ :=\ \textbf{ord}(\texttt{'*'}); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \ \ Root\textasciicircum{}.Right\ :=\ Q; \\
+\mbox{}\ \ \ \ \ \ \textbf{end}\ \textbf{else}\ \textbf{if}\ ((Root\textasciicircum{}.Right\ \textless{}\textgreater{}\ nil)\ \textbf{and}\ (Root\textasciicircum{}.Right\textasciicircum{}.T\ =\ Operation)\ \textbf{and} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ ((Root\textasciicircum{}.Right\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'+'}))\ \textbf{or}\ (Root\textasciicircum{}.Right\textasciicircum{}.Data\ =\ \textbf{ord}(\texttt{'-'})))) \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textit{\{Правый\ потомок\ -\ сложение\}} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{New}(Q); \\
+\mbox{}\ \ \ \ \ \ \ \ Q\textasciicircum{}.T\ :=\ Operation; \\
+\mbox{}\ \ \ \ \ \ \ \ Q\textasciicircum{}.Data\ :=\ \textbf{ord}(\texttt{'*'}); \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{CopyTree}(Root\textasciicircum{}.Left,\ Q\textasciicircum{}.Left); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \ \ Q\textasciicircum{}.Right\ :=\ Root\textasciicircum{}.Right\textasciicircum{}.Left; \\
+\mbox{}\ \ \ \ \ \ \ \ Root\textasciicircum{}.Right\textasciicircum{}.Left\ :=\ Root\textasciicircum{}.Left; \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \ \ Root\textasciicircum{}.Data\ :=\ Root\textasciicircum{}.Right\textasciicircum{}.Data; \\
+\mbox{}\ \ \ \ \ \ \ \ Root\textasciicircum{}.Right\textasciicircum{}.Data\ :=\ \textbf{ord}(\texttt{'*'}); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \ \ Root\textasciicircum{}.Left\ :=\ Q; \\
+\mbox{}\ \ \ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ \textit{\{Значения\ переменных\}} \\
+\mbox{}\ \ Var$\_$vals\ :\ \textbf{array}\ [\texttt{'a'}..\texttt{'z'}]\ \textbf{of}\ integer; \\
+\mbox{}\ \ \textit{\{Определена\ ли\ переменная\}} \\
+\mbox{}\ \ Var$\_$def\ :\ \textbf{array}\ [\texttt{'a'}..\texttt{'z'}]\ \textbf{of}\ boolean; \\
+\mbox{} \\
+\mbox{}\textbf{function}\ \textbf{DoCalculation}(\textbf{var}\ Root\ :\ PNode)\ :\ real; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ c\ :\ char; \\
+\mbox{}\ \ r\ :\ real; \\
+\mbox{}\ \ i\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (Root\ \textless{}\textgreater{}\ nil)\ \textbf{and}\ (\textbf{not}\ IsError)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ c\ :=\ \textbf{chr}(Root\textasciicircum{}.Data); \\
+\mbox{}\ \ \ \ \textbf{if}\ (Root\textasciicircum{}.T\ =\ Constant)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ DoCalculation\ :=\ Root\textasciicircum{}.Data \\
+\mbox{}\ \ \ \ \textbf{else}\ \textbf{if}\ (Root\textasciicircum{}.T\ =\ Variable)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \textbf{if}\ (\textbf{not}\ Var$\_$def[c])\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{write}(\texttt{'Введите\ значение\ переменной\ '},\ c,\ \texttt{':'}); \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{readln}(Var$\_$vals[c]); \\
+\mbox{}\ \ \ \ \ \ \ \ Var$\_$def[c]\ :=\ \textbf{true}; \\
+\mbox{}\ \ \ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \ \ \ \ DoCalculation\ :=\ Var$\_$vals[c]; \\
+\mbox{}\ \ \ \ \textbf{end}\ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \textbf{case}\ c\ \textbf{of} \\
+\mbox{}\ \ \ \ \ \ \ \ \texttt{'+'}:\ DoCalculation\ :=\ \textbf{DoCalculation}(Root\textasciicircum{}.Left)\ + \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{DoCalculation}(Root\textasciicircum{}.Right); \\
+\mbox{}\ \ \ \ \ \ \ \ \texttt{'-'}:\ DoCalculation\ :=\ \textbf{DoCalculation}(Root\textasciicircum{}.Left)\ - \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{DoCalculation}(Root\textasciicircum{}.Right); \\
+\mbox{}\ \ \ \ \ \ \ \ \texttt{'*'}:\ DoCalculation\ :=\ \textbf{DoCalculation}(Root\textasciicircum{}.Left)\ * \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{DoCalculation}(Root\textasciicircum{}.Right); \\
+\mbox{}\ \ \ \ \ \ \ \ \texttt{'/'}:\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ r\ :=\ \textbf{DoCalculation}(Root\textasciicircum{}.Right); \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i\ :=\ 0; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{if}\ (r\ =\ 0)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{Error}(\texttt{'Попытка\ деления\ на\ ноль!'},\ \texttt{''},\ i) \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DoCalculation\ :=\ \textbf{DoCalculation}(Root\textasciicircum{}.Left)\ /\ r; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{end}\ \textbf{else} \\
+\mbox{}\ \ \ \ DoCalculation\ :=\ 0; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{function}\ \textbf{Calculate}\ (\textbf{var}\ Root\ :\ PNode)\ :\ real; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ c\ :\ char; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{for}\ c\ :=\ \texttt{'a'}\ \textbf{to}\ \texttt{'z'}\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ Var$\_$vals[c]\ :=\ 0; \\
+\mbox{}\ \ \ \ Var$\_$def[c]\ :=\ \textbf{false}; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ Calculate\ :=\ \textbf{DoCalculation}(Root); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Обработка\ одной\ строки\}} \\
+\mbox{}\textbf{procedure}\ \textbf{Evaluate}(S\ :\ string); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ R\ :\ PNode; \\
+\mbox{}\ \ Res\ :\ real; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ R\ :=\ nil; \\
+\mbox{}\ \ IsError\ :=\ \textbf{false}; \\
+\mbox{}\ \ \textbf{CreateInfixTree}(R,\ S); \\
+\mbox{}\ \ \textbf{if}\ (\textbf{not}\ IsError)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{Simplify}(R); \\
+\mbox{}\ \ \ \ \textbf{DumpTree}(R,\ 0); \\
+\mbox{}\ \ \ \ Res\ :=\ \textbf{Calculate}(R); \\
+\mbox{}\ \ \ \ \textbf{if}\ (\textbf{not}\ IsError)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{writeln}(\texttt{'Значение\ выражения\ '},\ Res:8:4) \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{FreeTree}(R); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Обработка\ файла\}} \\
+\mbox{}\textbf{procedure}\ \textbf{ReadFile}(FName\ :\ string); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ F\ :\ \textbf{text}; \\
+\mbox{}\ \ S\ :\ string; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{assign}(F,\ FName); \\
+\mbox{}\ \ \textbf{reset}(F); \\
+\mbox{}\ \ \textbf{while}\ (\textbf{not}\ \textbf{SeekEOF}(F))\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{readln}(F,\ S); \\
+\mbox{}\ \ \ \ \textbf{Evaluate}(S); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Отображение\ справки\}} \\
+\mbox{}\textbf{procedure}\ ShowHelp; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{writeln}(\texttt{'\ '}:4,\ \texttt{'Помощь:'}); \\
+\mbox{}\ \ \textbf{writeln}(\texttt{'\ '}:8,\ \texttt{'F'},\ \texttt{'\ \ \ \ Указать\ файл\ с\ входными\ данными'}); \\
+\mbox{}\ \ \textbf{writeln}(\texttt{'\ '}:8,\ \texttt{'S'},\ \texttt{'\ \ \ \ Ввести\ вычисляемую\ строку\ вручную'}); \\
+\mbox{}\ \ \textbf{writeln}(\texttt{'\ '}:8,\ \texttt{'H'},\ \texttt{'\ \ \ \ Вывод\ данного\ сообщения'}); \\
+\mbox{}\ \ \textbf{writeln}(\texttt{'\ '}:8,\ \texttt{'Q'},\ \texttt{'\ \ \ \ Возврат\ на\ предыдущий\ шаг,\ в\ главном\ меню\ -\ выход'}); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Запрос\ имени\ файла\}} \\
+\mbox{}\textbf{procedure}\ RunFile; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ S\ :\ string; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ S\ :=\ \texttt{''}; \\
+\mbox{}\  \\
+\mbox{}\ \ \textbf{repeat} \\
+\mbox{}\ \ \ \ \textbf{if}\ (S\ \textless{}\textgreater{}\ \texttt{''})\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{writeln}(\texttt{'Файл\ с\ именем\ '},\ S,\ \texttt{'\ не\ существует!'}); \\
+\mbox{}\ \ \ \ \textbf{write}(\texttt{'Введите\ имя\ файла\ (пустое\ =\ имя\ по\ умолчанию):\ '}); \\
+\mbox{}\ \ \ \ \textbf{readln}(S); \\
+\mbox{}\ \ \ \ \textbf{if}\ (S\ =\ \texttt{''})\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ S\ :=\ \texttt{'in.txt'}; \\
+\mbox{}\ \ \textbf{until}\ \textbf{FileExists}(S)\ \textbf{OR}\ (\textbf{upcase}(S[1])\ =\ \texttt{'Q'}); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textbf{if}\ (\textbf{upcase}(S[1])\ \textless{}\textgreater{}\ \texttt{'Q'})\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{ReadFile}(S); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Обработка\ одной,\ вручную\ введенной\ строки\}} \\
+\mbox{}\textbf{procedure}\ RunString; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ S\ :\ string; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{write}(\texttt{'Введите\ выражение:\ '}); \\
+\mbox{}\ \ \textbf{readln}(S); \\
+\mbox{}\ \ \textbf{if}\ (S\ =\ \texttt{''})\ \textbf{then} \\
+\mbox{}\ \ \ \ \textbf{writeln}(\texttt{'Выражение\ не\ должно\ быть\ пустым!'}) \\
+\mbox{}\ \ \textbf{else}\ \textbf{if}\ (\textbf{upcase}(S[1])\ \textless{}\textgreater{}\ \texttt{'Q'})\ \textbf{then} \\
+\mbox{}\ \ \ \ \textbf{Evaluate}(S); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Диалог\ с\ пользователем\}} \\
+\mbox{}\textbf{procedure}\ MainLoop; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ C\ :\ char; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{writeln}(\texttt{'Программа\ для\ упрощения\ алгебраических\ операций'}); \\
+\mbox{}\ \ \textbf{repeat} \\
+\mbox{}\ \ \ \ \textbf{write}(\texttt{'Введите\ команду\ (h\ для\ справки):\ '}); \\
+\mbox{}\ \ \ \ \textbf{readln}(C); \\
+\mbox{}\ \ \ \ \textbf{case}\ \textbf{upcase}(C)\ \textbf{of} \\
+\mbox{}\ \ \ \ \ \ \texttt{'H'}:\ ShowHelp; \\
+\mbox{}\ \ \ \ \ \ \texttt{'F'}:\ RunFile; \\
+\mbox{}\ \ \ \ \ \ \texttt{'S'}:\ RunString; \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{until}\ \textbf{upcase}(C)\ =\ \texttt{'Q'}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{Основная\ программа\}} \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ MainLoop; \\
+\mbox{}\textbf{end}. \\
+\mbox{} \\
+\mbox{}

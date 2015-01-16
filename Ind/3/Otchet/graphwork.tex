@@ -1,0 +1,131 @@
+% Generator: GNU source-highlight, by Lorenzo Bettini, http://www.gnu.org/software/src-highlite
+\noindent
+\mbox{}unit\ GraphWork; \\
+\mbox{} \\
+\mbox{}\textit{\{\$mode\ objfpc\}\{\$H+\}} \\
+\mbox{} \\
+\mbox{}interface \\
+\mbox{} \\
+\mbox{}\textbf{uses} \\
+\mbox{}\ \ Classes,\ SysUtils; \\
+\mbox{} \\
+\mbox{} \\
+\mbox{}\textbf{type} \\
+\mbox{}\ \ \textit{//\ Матрица\ смежности} \\
+\mbox{}\ \ Graph\ =\ \textbf{array}\ \textbf{of}\ \textbf{array}\ \textbf{of}\ integer; \\
+\mbox{}\ \ IArray\ =\ \textbf{array}\ \textbf{of}\ integer; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ \textbf{DumpTo}(\textbf{var}\ M\ :\ Graph;\ N\ :\ integer;\ FName\ :\ string); \\
+\mbox{}\textbf{procedure}\ \textbf{BuildHorseMatrix2}(\textbf{var}\ M\ :\ Graph;\ N\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X1,\ Y1,\ X2,\ Y2\ :\ integer); \\
+\mbox{}\textbf{procedure}\ \textbf{ReverseWave}(\textbf{var}\ M\ :\ Graph;\ N\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X1,\ Y1,\ X2,\ Y2\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{var}\ Path\ :\ IArray); \\
+\mbox{} \\
+\mbox{}implementation \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ \textbf{Mark}(\textbf{var}\ M\ :\ Graph;\ N,d\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x,y\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X1,Y1\ :\ integer); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (X\ \textgreater{}=\ 0)\ \textbf{AND}\ (X\ \textless{}\ N)\ \textbf{AND} \\
+\mbox{}\ \ \ \ \ (Y\ \textgreater{}=\ 0)\ \textbf{AND}\ (Y\ \textless{}\ N)\ \textbf{AND} \\
+\mbox{}\ \ \ \ \ (M[X][Y]\ \textgreater{}\ d)\ \textbf{then}\ \textbf{begin} \\
+\mbox{} \\
+\mbox{}\ \ \ \ M[x][y]\ :=\ d; \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textbf{Mark}(M,\ N,\ d+1,\ x+1,\ y+2,\ X1,\ Y1); \\
+\mbox{}\ \ \ \ \textbf{Mark}(M,\ N,\ d+1,\ x+1,\ y-2,\ X1,\ Y1); \\
+\mbox{}\ \ \ \ \textbf{Mark}(M,\ N,\ d+1,\ x-1,\ y+2,\ X1,\ Y1); \\
+\mbox{}\ \ \ \ \textbf{Mark}(M,\ N,\ d+1,\ x-1,\ y-2,\ X1,\ Y1); \\
+\mbox{}\ \ \ \ \textbf{Mark}(M,\ N,\ d+1,\ x+2,\ y+1,\ X1,\ Y1); \\
+\mbox{}\ \ \ \ \textbf{Mark}(M,\ N,\ d+1,\ x+2,\ y-1,\ X1,\ Y1); \\
+\mbox{}\ \ \ \ \textbf{Mark}(M,\ N,\ d+1,\ x-2,\ y+1,\ X1,\ Y1); \\
+\mbox{}\ \ \ \ \textbf{Mark}(M,\ N,\ d+1,\ x-2,\ y-1,\ X1,\ Y1); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Прямой\ ход\ алгоритма\ Ли\ -\ размечаем\ матрицу\ расстояний} \\
+\mbox{}\textbf{procedure}\ \textbf{BuildHorseMatrix2}(\textbf{var}\ M\ :\ Graph;\ N\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X1,\ Y1,\ X2,\ Y2\ :\ integer); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ i,j\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{SetLength}(M,\ N,\ N); \\
+\mbox{}\ \ \textbf{for}\ i\ :=\ 0\ \textbf{to}\ N-1\ \textbf{do} \\
+\mbox{}\ \ \ \ \textbf{for}\ j\ :=\ 0\ \textbf{to}\ N-1\ \textbf{do} \\
+\mbox{}\ \ \ \ \ \ M[i][j]\ :=\ N*N; \\
+\mbox{}\ \ \textbf{Mark}(M,\ N,\ 0,\ X1,\ Y1,\ X2,\ Y2); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Поиск\ соседней\ ячейки} \\
+\mbox{}\textit{//\ Ячейка\ считается\ соседней,\ если\ она\ доступна\ за\ один\ шаг} \\
+\mbox{}\textit{//\ и\ значение\ в\ ней\ меньше\ на\ единичку} \\
+\mbox{}\textbf{function}\ \textbf{FindNear}(\textbf{var}\ M\ :\ Graph;\ N\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X,\ Y\ :\ integer)\ :\ integer; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ d\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ D\ :=\ M[X][Y]; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{if}\ (X+1\ \textless{}\ N)\ \textbf{AND}\ (Y+2\ \textless{}\ N)\ \textbf{AND}\ (M[X+1][Y+2]\ \textless{}\ d)\ \textbf{then} \\
+\mbox{}\ \ \ \ FindNear\ :=\ X+1\ +\ (Y+2)*N \\
+\mbox{}\ \ \textbf{else}\ \textbf{if}\ (X+1\ \textless{}\ N)\ \textbf{AND}\ (Y-2\ \textgreater{}=\ 0)\ \textbf{AND}\ (M[X+1][Y-2]\ \textless{}\ d)\ \textbf{then} \\
+\mbox{}\ \ \ \ FindNear\ :=\ X+1\ +\ (Y-2)*N \\
+\mbox{}\ \ \textbf{else}\ \textbf{if}\ (X-1\ \textgreater{}=\ 0)\ \textbf{AND}\ (Y+2\ \textless{}\ N)\ \textbf{AND}\ (M[X-1][Y+2]\ \textless{}\ d)\ \textbf{then} \\
+\mbox{}\ \ \ \ FindNear\ :=\ X-1\ +\ (Y+2)*N \\
+\mbox{}\ \ \textbf{else}\ \textbf{if}\ (X-1\ \textgreater{}=\ 0)\ \textbf{AND}\ (Y-2\ \textgreater{}=\ 0)\ \textbf{AND}\ (M[X-1][Y-2]\ \textless{}\ d)\ \textbf{then} \\
+\mbox{}\ \ \ \ FindNear\ :=\ X-1\ +\ (Y-2)*N \\
+\mbox{}\ \ \textbf{else}\ \textbf{if}\ (X+2\ \textless{}\ N)\ \textbf{AND}\ (Y+1\ \textless{}\ N)\ \textbf{AND}\ (M[X+2][Y+1]\ \textless{}\ d)\ \textbf{then} \\
+\mbox{}\ \ \ \ FindNear\ :=\ X+2\ +\ (Y+1)*N \\
+\mbox{}\ \ \textbf{else}\ \textbf{if}\ (X+2\ \textless{}\ N)\ \textbf{AND}\ (Y-1\ \textgreater{}=\ 0)\ \textbf{AND}\ (M[X+2][Y-1]\ \textless{}\ d)\ \textbf{then} \\
+\mbox{}\ \ \ \ FindNear\ :=\ X+2\ +\ (Y-1)*N \\
+\mbox{}\ \ \textbf{else}\ \textbf{if}\ (X-2\ \textgreater{}=\ 0)\ \textbf{AND}\ (Y+1\ \textless{}\ N)\ \textbf{AND}\ (M[X-2][Y+1]\ \textless{}\ d)\ \textbf{then} \\
+\mbox{}\ \ \ \ FindNear\ :=\ X-2\ +\ (Y+1)*N \\
+\mbox{}\ \ \textbf{else}\ \textbf{if}\ (X-2\ \textgreater{}=\ 0)\ \textbf{AND}\ (Y-1\ \textgreater{}=\ 0)\ \textbf{AND}\ (M[X-2][Y-1]\ \textless{}\ d)\ \textbf{then} \\
+\mbox{}\ \ \ \ FindNear\ :=\ X-2\ +\ (Y-1)*N \\
+\mbox{}\ \ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ raise\ Exception.\textbf{Create}(\texttt{'Something\ wrong!'}); \\
+\mbox{}\ \ \ \ FindNear\ :=\ -1; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Обратный\ ход\ алгоритма\ Ли} \\
+\mbox{}\textbf{procedure}\ \textbf{ReverseWave}(\textbf{var}\ M\ :\ Graph;\ N\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X1,\ Y1,\ X2,\ Y2\ :\ integer; \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{var}\ Path\ :\ IArray); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ i\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{SetLength}(Path,\ N*N); \\
+\mbox{}\ \ i\ :=\ 0; \\
+\mbox{}\ \ Path[0]\ :=\ X2\ +\ Y2*N; \\
+\mbox{}\ \ \textbf{while}\ ((X1\ \textless{}\textgreater{}\ X2)\ \textbf{or}\ (Y1\ \textless{}\textgreater{}\ Y2))\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{inc}(i); \\
+\mbox{}\ \ \ \ Path[i]\ :=\ \textbf{FindNear}(M,\ N,\ X2,\ Y2); \\
+\mbox{}\ \ \ \ X2\ :=\ Path[i]\ \textbf{mod}\ N; \\
+\mbox{}\ \ \ \ Y2\ :=\ Path[i]\ \textbf{div}\ N; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ Path[i+1]\ :=\ X1\ +\ Y1*N; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ \textbf{DumpTo}(\textbf{var}\ M\ :\ Graph;\ N\ :\ integer;\ FName\ :\ string); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ F\ :\ \textbf{text}; \\
+\mbox{}\ \ i,j\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{assignFile}(f,\ fname); \\
+\mbox{}\ \ \textbf{rewrite}(f); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{for}\ i\ :=\ 0\ \textbf{to}\ N-1\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{for}\ j\ :=\ 0\ \textbf{to}\ N-1\ \textbf{do} \\
+\mbox{}\ \ \ \ \ \ \textbf{write}(f,\ M[i][j],\ \texttt{'\ '}); \\
+\mbox{}\ \ \ \ \textbf{writeln}(f); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{closeFile}(f); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{end}. \\
+\mbox{} \\
+\mbox{}

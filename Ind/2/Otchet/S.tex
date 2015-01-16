@@ -1,0 +1,121 @@
+% Generator: GNU source-highlight, by Lorenzo Bettini, http://www.gnu.org/software/src-highlite
+\noindent
+\mbox{}unit\ StackUtil; \\
+\mbox{} \\
+\mbox{}interface \\
+\mbox{} \\
+\mbox{}\textbf{type} \\
+\mbox{}\ \ RType\ =\ (Variable,\ Constant,\ Operation,\ Bracket); \\
+\mbox{}\ \ PNode\ =\ \textasciicircum{}TNode; \\
+\mbox{}\ \ TNode\ =\ \textbf{record} \\
+\mbox{}\ \ \ \ Data\ :\ integer; \\
+\mbox{}\ \ \ \ T\ :\ RType; \\
+\mbox{}\ \ \ \ Left,\ Right,\ Next\ :\ PNode; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ \textbf{Push}(X\ :\ PNode); \\
+\mbox{}\textbf{function}\ Pop\ :\ PNode; \\
+\mbox{}\textbf{function}\ ReadTop\ :\ PNode; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ ResetStack; \\
+\mbox{}\textbf{function}\ IsClear\ :\ boolean; \\
+\mbox{}\textbf{procedure}\ \textbf{Error}(S1,\ S2\ :\ string;\ \textbf{var}\ N\ :\ integer); \\
+\mbox{} \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ IsError\ :\ boolean; \\
+\mbox{} \\
+\mbox{}implementation \\
+\mbox{} \\
+\mbox{}\textbf{const}\ NMax\ =\ 100; \\
+\mbox{} \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ Stack\ :\ \textbf{array}\ [0..NMax]\ \textbf{of}\ int64; \\
+\mbox{}\ \ SP\ :\ integer; \\
+\mbox{} \\
+\mbox{}\textit{//\ Процедура\ обработки\ ошибок} \\
+\mbox{}\textbf{procedure}\ \textbf{Error}(S1,\ S2\ :\ string;\ \textbf{var}\ N\ :\ integer); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{writeln}(\texttt{'Ошибка:\ '},\ S1); \\
+\mbox{}\ \ \textbf{writeln}(S2); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{if}\ (N\ \textless{}\textgreater{}\ 0)\ \textbf{then} \\
+\mbox{}\ \ \ \ \textbf{writeln}(\texttt{'\textasciicircum{}'}:N); \\
+\mbox{} \\
+\mbox{}\ \ \textit{//\ Остановим\ парсер} \\
+\mbox{}\ \ N\ :=\ \textbf{length}(S2)\ +\ 1; \\
+\mbox{}\ \ IsError\ :=\ \textbf{true}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Пуст\ ли\ стек?} \\
+\mbox{}\textbf{function}\ IsClear\ :\ boolean; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ IsClear\ :=\ SP\ =\ 1; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Сбрасывает\ стек} \\
+\mbox{}\textbf{procedure}\ ResetStack; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{for}\ SP\ :=\ 0\ \textbf{to}\ NMax\ \textbf{do} \\
+\mbox{}\ \ \ \ Stack[SP]\ :=\ 0; \\
+\mbox{}\ \ SP\ :=\ 1; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Положить\ в\ стек\ элемент} \\
+\mbox{}\textbf{procedure}\ \textbf{$\_$Push}(X\ :\ int64); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (SP\ \textless{}=\ NMax)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ Stack[SP]\ :=\ X; \\
+\mbox{}\ \ \ \ \textbf{inc}(SP); \\
+\mbox{}\ \ \textbf{end}\ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ SP\ :=\ 0; \\
+\mbox{}\ \ \ \ \textbf{Error}(\texttt{'Переполнение\ стека'},\ \texttt{''},\ SP); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Достать\ из\ стека\ элемент} \\
+\mbox{}\textbf{function}\ $\_$Pop\ :\ int64; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (SP\ \textgreater{}\ 1)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{dec}(SP); \\
+\mbox{}\ \ \ \ $\_$Pop\ :=\ Stack[SP]; \\
+\mbox{}\ \ \textbf{end}\ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ SP\ :=\ 0; \\
+\mbox{}\ \ \ \ \textbf{Error}(\texttt{'Попытка\ чтения\ пустого\ стека,\ проверьте\ корректность\ выражения'}, \\
+\mbox{}\ \ \ \ \texttt{''},\ SP); \\
+\mbox{}\ \ \ \ $\_$Pop\ :=\ 0; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Возвращает\ значение\ верхушки\ стека,\ не\ извлекая\ его} \\
+\mbox{}\textbf{function}\ $\_$ReadTop\ :\ int64; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (SP\ \textgreater{}\ 1)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ $\_$ReadTop\ :=\ Stack[SP-1]; \\
+\mbox{}\ \ \textbf{end}\ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{writeln}(\texttt{'Stack\ read\ underflow!'}); \\
+\mbox{}\ \ \ \ $\_$ReadTop\ :=\ 0; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Обертки} \\
+\mbox{}\textbf{procedure}\ \textbf{Push}(X\ :\ PNode); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{$\_$Push}(\textbf{Int64}(X)); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{function}\ Pop\ :\ PNode; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ Pop\ :=\ \textbf{Pointer}($\_$Pop); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{function}\ ReadTop\ :\ PNode; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ ReadTop\ :=\ \textbf{Pointer}($\_$ReadTop); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Инициализация\ стека} \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ ResetStack; \\
+\mbox{}\textbf{end}. \\
+\mbox{} \\
+\mbox{}

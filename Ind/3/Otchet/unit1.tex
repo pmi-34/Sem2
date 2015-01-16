@@ -1,0 +1,285 @@
+% Generator: GNU source-highlight, by Lorenzo Bettini, http://www.gnu.org/software/src-highlite
+\noindent
+\mbox{}unit\ Unit1; \\
+\mbox{} \\
+\mbox{}\textit{\{\$mode\ objfpc\}\{\$H+\}} \\
+\mbox{} \\
+\mbox{}interface \\
+\mbox{} \\
+\mbox{}\textbf{uses} \\
+\mbox{}\ \ Classes,\ SysUtils,\ FileUtil,\ Forms,\ Controls,\ Graphics,\ Dialogs,\ Spin, \\
+\mbox{}\ \ StdCtrls,\ ExtCtrls,\ LCLIntf,\ Menus,\ GraphWork,\ unit2; \\
+\mbox{} \\
+\mbox{}\textbf{type} \\
+\mbox{} \\
+\mbox{}\ \ \textit{\{\ TMainForm\ \}} \\
+\mbox{} \\
+\mbox{}\ \ TMainForm\ =\ \textbf{class}(TForm) \\
+\mbox{}\ \ \ \ ApplySizeButton:\ TButton; \\
+\mbox{}\ \ \ \ GrassCoordLabel:\ TLabel; \\
+\mbox{}\ \ \ \ Label2:\ TLabel; \\
+\mbox{}\ \ \ \ HorseCoordLabel:\ TLabel; \\
+\mbox{}\ \ \ \ MainMenu1:\ TMainMenu; \\
+\mbox{}\ \ \ \ ExitItem:\ TMenuItem; \\
+\mbox{}\ \ \ \ AboutItem:\ TMenuItem; \\
+\mbox{}\ \ \ \ ParamItem:\ TMenuItem; \\
+\mbox{}\ \ \ \ TimeLabel:\ TLabel; \\
+\mbox{}\ \ \ \ MovesLabel:\ TLabel; \\
+\mbox{}\ \ \ \ ShowDistCheckBox:\ TCheckBox; \\
+\mbox{}\ \ \ \ Label1:\ TLabel; \\
+\mbox{}\ \ \ \ FieldPaintBox:\ TPaintBox; \\
+\mbox{}\ \ \ \ SizeSpinEdit:\ TSpinEdit; \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{AboutItemClick}(Sender:\ TObject); \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{ApplySizeButtonClick}(Sender:\ TObject); \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{ExitItemClick}(Sender:\ TObject); \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{FieldPaintBoxMouseDown}(Sender:\ TObject;\ Button:\ TMouseButton; \\
+\mbox{}\ \ \ \ \ \ Shift:\ TShiftState;\ X,\ Y:\ Integer); \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{FormClose}(Sender:\ TObject;\ \textbf{var}\ CloseAction:\ TCloseAction); \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{FormCreate}(Sender:\ TObject); \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{FormPaint}(Sender:\ TObject); \\
+\mbox{}\ \ \ \ \textbf{procedure}\ CalcPath; \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{ShowDistCheckBoxChange}(Sender:\ TObject); \\
+\mbox{}\ \ private \\
+\mbox{}\ \ \ \ \textit{\{\ private\ declarations\ \}} \\
+\mbox{}\ \ \ \ \textit{//\ Размер\ поля\ в\ клетках} \\
+\mbox{}\ \ \ \ ChessSize\ :\ integer; \\
+\mbox{}\ \ \ \ Horse,\ Grass,\ Check\ :\ TPicture; \\
+\mbox{}\ \ \ \ HX,\ HY\ :\ integer; \\
+\mbox{}\ \ \ \ GX,\ GY\ :\ integer; \\
+\mbox{}\ \ \ \ M\ :\ Graph; \\
+\mbox{}\ \ \ \ Path\ :\ IArray; \\
+\mbox{}\ \ \ \ AboutBox\ :\ TAboutBox; \\
+\mbox{}\ \ public \\
+\mbox{}\ \ \ \ \textit{\{\ public\ declarations\ \}} \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Размер\ клетки\ поля\ в\ пикселях} \\
+\mbox{}\textbf{const} \\
+\mbox{}\ \ CellSize\ =\ 40; \\
+\mbox{}\ \ INFILE\ =\ \texttt{'input.txt'}; \\
+\mbox{}\ \ OUTFILE\ =\ \texttt{'output.txt'}; \\
+\mbox{} \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ MainForm:\ TMainForm; \\
+\mbox{} \\
+\mbox{}implementation \\
+\mbox{} \\
+\mbox{}\textit{\{\$R\ *.lfm\}} \\
+\mbox{} \\
+\mbox{}\textit{\{\ TMainForm\ \}} \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.\textbf{FormCreate}(Sender:\ TObject); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ f\ :\ \textbf{text}; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ FieldPaintBox.Width\ :=\ SizeSpinEdit.MaxValue*CellSize; \\
+\mbox{}\ \ FieldPaintBox.Height\ :=\ SizeSpinEdit.MaxValue*CellSize; \\
+\mbox{} \\
+\mbox{}\ \ Horse\ :=\ TPicture.Create; \\
+\mbox{}\ \ Horse.\textbf{LoadFromFile}(\texttt{'kon2.png'}); \\
+\mbox{} \\
+\mbox{}\ \ Grass\ :=\ TPicture.Create; \\
+\mbox{}\ \ Grass.\textbf{LoadFromFile}(\texttt{'gra2.png'}); \\
+\mbox{} \\
+\mbox{}\ \ Check\ :=\ TPicture.Create; \\
+\mbox{}\ \ Check.\textbf{LoadFromFile}(\texttt{'che2.png'}); \\
+\mbox{} \\
+\mbox{}\ \ try \\
+\mbox{}\ \ \ \ \textit{//\ Считываем\ данные\ из\ файла} \\
+\mbox{}\ \ \ \ \textbf{AssignFile}(f,\ INFILE); \\
+\mbox{}\ \ \ \ \textbf{Reset}(F); \\
+\mbox{}\ \ \ \ \textbf{Readln}(F,\ ChessSize); \\
+\mbox{}\ \ \ \ \textbf{if}\ (ChessSize\ \textless{}\ 5)\ \textbf{or}\ (ChessSize\ \textgreater{}\ 20)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ ChessSize\ :=\ 5; \\
+\mbox{}\ \ \ \ SizeSpinEdit.Value\ :=\ ChessSize; \\
+\mbox{}\ \ \ \ \textbf{Readln}(F,\ HX,\ HY); \\
+\mbox{}\ \ \ \ \textbf{if}\ (HX\ \textless{}\ 1)\ \textbf{or}\ (HX\ \textgreater{}\ ChessSize)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ HX\ :=\ 0 \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \textbf{dec}(HX); \\
+\mbox{}\ \ \ \ \textbf{if}\ (HY\ \textless{}\ 1)\ \textbf{or}\ (HY\ \textgreater{}\ ChessSize)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ HY\ :=\ 0 \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \textbf{dec}(HY); \\
+\mbox{}\ \ \ \ \textbf{Readln}(F,\ GX,\ GY); \\
+\mbox{}\ \ \ \ \textbf{if}\ (GX\ \textless{}\ 1)\ \textbf{or}\ (GX\ \textgreater{}\ ChessSize)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ GX\ :=\ 0 \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \textbf{dec}(GX); \\
+\mbox{}\ \ \ \ \textbf{if}\ (GY\ \textless{}\ 1)\ \textbf{or}\ (GY\ \textgreater{}\ ChessSize)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ GY\ :=\ 0 \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \textbf{dec}(GY); \\
+\mbox{}\ \ \ \ \textbf{CloseFile}(F); \\
+\mbox{}\ \ except \\
+\mbox{}\ \ \ \ ChessSize\ :=\ SizeSpinEdit.MinValue; \\
+\mbox{}\ \ \ \ HX\ :=\ 0; \\
+\mbox{}\ \ \ \ HY\ :=\ 0; \\
+\mbox{} \\
+\mbox{}\ \ \ \ GX\ :=\ ChessSize\ -\ 1; \\
+\mbox{}\ \ \ \ GY\ :=\ ChessSize\ -\ 1; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ CalcPath; \\
+\mbox{}\ \ AboutBox\ :=\ TAboutBox.\textbf{Create}(self); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.\textbf{FormPaint}(Sender:\ TObject); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ i,\ j\ :\ integer; \\
+\mbox{}\ \ ColorT\ :\ TColor; \\
+\mbox{}\ \ N\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ FieldPaintBox.Width:=CellSize*ChessSize; \\
+\mbox{}\ \ FieldPaintBox.Height:=CellSize*ChessSize; \\
+\mbox{} \\
+\mbox{}\ \ Width:=200+CellSize*ChessSize; \\
+\mbox{}\ \ Height:=CellSize*ChessSize; \\
+\mbox{} \\
+\mbox{}\ \ \textit{//\ Рисуем\ поле} \\
+\mbox{}\ \ \textbf{for}\ i\ :=\ 0\ \textbf{to}\ ChessSize-1\ \textbf{do} \\
+\mbox{}\ \ \ \ \textbf{for}\ j\ :=\ 0\ \textbf{to}\ ChessSize-1\ \textbf{do} \\
+\mbox{}\ \ \ \ \ \ \textbf{with}\ FieldPaintBox.Canvas\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \textit{//\ Выберем\ цвет\ клетки} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{if}\ ((ChessSize\ -\ i)\ +\ j)\ \textbf{mod}\ 2\ =\ 1\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ ColorT\ :=\ \textbf{RGB}(70,35,0)\ \textit{//\ Темно-коричневый} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ ColorT\ :=\ \textbf{RGB}(240,\ 240,\ 220);\ \textit{//\ Слоновая\ кость} \\
+\mbox{}\ \ \ \ \ \ \ \ Pen.Color\ :=\ ColorT; \\
+\mbox{}\ \ \ \ \ \ \ \ Brush.Color\ :=\ ColorT; \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{FillRect}(i*CellSize,\ j*CellSize,\ (i+1)*CellSize,\ (j+1)*CellSize); \\
+\mbox{}\ \ \ \ \ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{with}\ FieldPaintBox.Canvas\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textit{//\ Рамочка\ вокруг\ поля} \\
+\mbox{}\ \ \ \ Pen.Color\ :=\ clWhite; \\
+\mbox{}\ \ \ \ Brush.Color\ :=\ clBlack; \\
+\mbox{}\ \ \ \ \textbf{FrameRect}(0,0,CellSize*ChessSize,CellSize*ChessSize); \\
+\mbox{}\ \ \ \ \textit{//\ Рисуем\ коня} \\
+\mbox{}\ \ \ \ \textbf{Draw}(HX*CellSize+(CellSize-Horse.Bitmap.Width)\ \textbf{div}\ 2, \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ HY*CellSize,Horse.Bitmap); \\
+\mbox{}\ \ \ \ \textit{//\ Рисуем\ траву} \\
+\mbox{}\ \ \ \ \textbf{Draw}(GX*CellSize+(CellSize-Grass.Bitmap.Width)\ \textbf{div}\ 2, \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ GY*CellSize,Grass.Bitmap); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textit{//\ Отображение\ пути} \\
+\mbox{}\ \ \ \ N\ :=\ HX\ +\ HY*ChessSize; \\
+\mbox{}\ \ \ \ i\ :=\ -1; \\
+\mbox{}\ \ \ \ \textbf{repeat} \\
+\mbox{}\ \ \ \ \ \ \textbf{inc}(i); \\
+\mbox{}\ \ \ \ \ \ \textbf{Draw}((Path[i]\ \textbf{mod}\ ChessSize)*CellSize, \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ (Path[i]\ \textbf{div}\ ChessSize)*CellSize, \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ Check.Bitmap); \\
+\mbox{}\ \ \ \ \textbf{until}\ Path[i]\ =\ N; \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textit{//\ Прорисуем\ доступные\ для\ прыжка\ клетки} \\
+\mbox{}\ \ \ \ \textit{//\ Нужно\ же\ как-то\ проверить\ алгоритм\ генерации} \\
+\mbox{}\ \ \ \ \textbf{if}\ (ShowDistCheckBox.Checked)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ Pen.Color\ :=\ clBlack; \\
+\mbox{}\ \ \ \ \ \ Brush.Color:=clWhite; \\
+\mbox{}\ \ \ \ \ \ \textbf{for}\ i\ :=\ 0\ \textbf{to}\ ChessSize-1\ \textbf{do} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{for}\ j\ :=\ 0\ \textbf{to}\ ChessSize-1\ \textbf{do} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{TextOut}(i*CellSize,\ j*CellSize,\ \textbf{IntToStr}(M[i][j])); \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ HorseCoordLabel.Caption\ :=\ \texttt{'Координаты\ коня:\ '}\ +\ \textbf{IntToStr}(HX+1) \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \texttt{','}\ +\ \textbf{IntToStr}(HY+1); \\
+\mbox{}\ \ GrassCoordLabel.Caption\ :=\ \texttt{'Координаты\ травы:\ '}\ +\ \textbf{IntToStr}(GX+1) \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ \texttt{','}\ +\ \textbf{IntToStr}(GY+1); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.\textbf{ApplySizeButtonClick}(Sender:\ TObject); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textit{//\ Изменим\ размеры\ поля} \\
+\mbox{}\ \ ChessSize\ :=\ SizeSpinEdit.Value; \\
+\mbox{}\ \ \textit{//\ Подвинем\ коня\ и\ траву} \\
+\mbox{}\ \ \textbf{if}\ (HX\ \textgreater{}=\ ChessSize)\ \textbf{or}\ (HY\ \textgreater{}=\ ChessSize)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ HX\ :=\ 0; \\
+\mbox{}\ \ \ \ HY\ :=\ 0; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{if}\ (GX\ \textgreater{}=\ ChessSize)\ \textbf{or}\ (GY\ \textgreater{}=\ ChessSize)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ GX\ :=\ ChessSize-1; \\
+\mbox{}\ \ \ \ GY\ :=\ ChessSize-1; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ CalcPath; \\
+\mbox{}\ \ Repaint; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.\textbf{AboutItemClick}(Sender:\ TObject); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ AboutBox.ShowModal; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.\textbf{ExitItemClick}(Sender:\ TObject); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ Close; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.CalcPath; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ N\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ N\ :=\ GetTickCount; \\
+\mbox{}\ \ \textit{//\ Рассчет\ пути\ коня} \\
+\mbox{}\ \ \textbf{BuildHorseMatrix2}(M,\ ChessSize,\ HX,\ HY,\ GX,\ GY); \\
+\mbox{}\ \ \textbf{ReverseWave}(M,\ ChessSize,\ HX,\ HY,\ GX,\ GY,\ Path); \\
+\mbox{}\ \ \textit{//DumpTo(Path,\ ChessSize,\ 'Path.txt');} \\
+\mbox{}\ \ N\ :=\ GetTickCount\ -\ N; \\
+\mbox{}\ \ MovesLabel.Caption\ :=\ \texttt{'Ходов\ коня:\ '}\ +\ \textbf{IntToStr}(M[GX][GY]); \\
+\mbox{}\ \ TimeLabel.Caption\ :=\ \textbf{IntToStr}(N)\ +\ \texttt{'\ миллисекунд'}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.\textbf{ShowDistCheckBoxChange}(Sender:\ TObject); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ Repaint; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.\textbf{FieldPaintBoxMouseDown}(Sender:\ TObject; \\
+\mbox{}\ \ Button:\ TMouseButton;\ Shift:\ TShiftState;\ X,\ Y:\ Integer); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ NX,\ NY\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (ssLeft\ \textbf{in}\ Shift)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ NX\ :=\ X\ \textbf{div}\ CellSize; \\
+\mbox{}\ \ \ \ NY\ :=\ Y\ \textbf{div}\ CellSize; \\
+\mbox{}\ \ \ \ \textbf{if}\ ((NX\ \textless{}\ ChessSize)\ \textbf{and}\ (NY\ \textless{}\ ChessSize))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ HX\ :=\ NX; \\
+\mbox{}\ \ \ \ \ \ HY\ :=\ NY; \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{end}\ \textbf{else}\ \textbf{if}\ (ssRight\ \textbf{in}\ Shift)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ NX\ :=\ X\ \textbf{div}\ CellSize; \\
+\mbox{}\ \ \ \ NY\ :=\ Y\ \textbf{div}\ CellSize; \\
+\mbox{}\ \ \ \ \textbf{if}\ ((NX\ \textless{}\ ChessSize)\ \textbf{and}\ (NY\ \textless{}\ ChessSize))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ GX\ :=\ NX; \\
+\mbox{}\ \ \ \ \ \ GY\ :=\ NY; \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ CalcPath; \\
+\mbox{}\ \ Repaint; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TMainForm.\textbf{FormClose}(Sender:\ TObject;\ \textbf{var}\ CloseAction:\ TCloseAction); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ f\ :\ \textbf{text}; \\
+\mbox{}\ \ i,N\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ Horse.Free; \\
+\mbox{}\ \ Grass.Free; \\
+\mbox{}\ \ Check.Free; \\
+\mbox{}\ \ \textbf{assignFile}(f,\ OUTFILE); \\
+\mbox{}\ \ \textbf{rewrite}(f); \\
+\mbox{}\ \ \textbf{writeln}(F,\ M[GX][GY]); \\
+\mbox{}\ \ N\ :=\ -1; \\
+\mbox{}\ \ \textbf{repeat} \\
+\mbox{}\ \ \ \ \textbf{inc}(N); \\
+\mbox{}\ \ \textbf{until}\ (Path[N]\ =\ HX\ +\ HY*ChessSize); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{for}\ i\ :=\ N\ \textbf{downto}\ 0\ \textbf{do} \\
+\mbox{}\ \ \ \ \textbf{writeln}(f,\ (Path[i]\ \textbf{mod}\ ChessSize)\ +\ 1,\ \texttt{'\ '},\ (Path[i]\ \textbf{div}\ ChessSize)\ +\ 1); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{closeFile}(f); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{end}. \\
+\mbox{} \\
+\mbox{}

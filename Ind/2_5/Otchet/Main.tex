@@ -1,0 +1,53 @@
+% Это комментарий
+% Комментарии начинаются с символа %
+% Формат А4, стиль - отчет
+\documentclass[a4paper,12pt]{report}
+% Поля - 2 сантиметра с каждой стороны, без места на подшивку
+\usepackage[left=2cm,right=2cm,
+    top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+% Входная кодировка - UTF-8
+\usepackage[utf8]{inputenc}
+% Язык текста - русский и английский. Русский - основной
+\usepackage[english,russian]{babel}
+% Для команды \Box и других математических
+\usepackage{amsfonts}
+% Для вставки изображений
+\usepackage{graphicx}
+% Для вставки исходного кода
+% \usepackage{listings}
+% Настройки листингов
+% \lstloadlanguages{[x86masm]Assembler}
+% \lstset{
+% language=[x86masm]Assembler,
+% extendedchars=\true,
+% inputencoding=utf8,
+% commentstyle=\itshape,
+% stringstyle=\bf,
+% belowcaptionskip=5pt
+% }
+% Нумерованные списки в виде 1.1
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}.}
+\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.}
+\renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}.}
+% Первый абзац должен начинаться с красной строки
+\usepackage{indentfirst}
+\usepackage{float}
+\restylefloat{figure}
+% Мы не используем главы, поэтому подправим номера секций
+\renewcommand{\thesection}{\arabic{section}.}
+% Исправим досадную ошибку с неразрывным пробелом в UTF-8
+\DeclareUnicodeCharacter{00A0}{~}
+\begin{document}
+\input{TitlePage}
+\setcounter{page}{2}
+\tableofcontents
+\pagebreak
+\input{Task}
+\input{Theory}
+\input{Algo_select}
+\input{Algo_desc}
+\input{Testing}
+\input{Conclusion}
+\input{Code}
+\input{Books}
+\end{document}

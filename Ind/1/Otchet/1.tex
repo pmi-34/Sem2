@@ -1,0 +1,355 @@
+% Generator: GNU source-highlight, by Lorenzo Bettini, http://www.gnu.org/software/src-highlite
+\noindent
+\mbox{}\textbf{program}\ \textbf{Ind1}\ (input,\ output); \\
+\mbox{} \\
+\mbox{}\textbf{uses} \\
+\mbox{}\ \ SysUtils; \\
+\mbox{} \\
+\mbox{}\textbf{type} \\
+\mbox{}\ \ PNode\ =\ \textasciicircum{}TNode; \\
+\mbox{}\ \ TNode\ =\ \textbf{record} \\
+\mbox{}\ \ \ \ C,P\ :\ integer; \\
+\mbox{}\ \ \ \ X\ :\ char; \\
+\mbox{}\ \ \ \ N\ :\ PNode; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ IsError\ :\ boolean; \\
+\mbox{} \\
+\mbox{}\textit{//\ Процедура\ обработки\ ошибок} \\
+\mbox{}\textbf{procedure}\ \textbf{Error}(S1,\ S2\ :\ string;\ \textbf{var}\ N\ :\ integer); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{writeln}(\texttt{'Ошибка:\ '},\ S1); \\
+\mbox{}\ \ \textbf{writeln}(S2); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{if}\ (N\ \textless{}\textgreater{}\ 0)\ \textbf{then} \\
+\mbox{}\ \ \ \ \textbf{writeln}(\texttt{'\textasciicircum{}'}:N); \\
+\mbox{} \\
+\mbox{}\ \ \textit{//\ Остановим\ парсер} \\
+\mbox{}\ \ N\ :=\ \textbf{length}(S2)\ +\ 1; \\
+\mbox{}\ \ IsError\ :=\ \textbf{true}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Переводит\ число\ в\ строку\ со\ знаком} \\
+\mbox{}\textbf{function}\ \textbf{IntToStrM}(X\ :\ integer)\ :\ string; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (X\ \textgreater{}\ 0)\ \textbf{then} \\
+\mbox{}\ \ \ \ IntToStrM\ :=\ \texttt{'+'}\ +\ \textbf{IntToStr}(X) \\
+\mbox{}\ \ \textbf{else} \\
+\mbox{}\ \ \ \ IntToStrM\ :=\ \textbf{IntToStr}(X); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Переводит\ часть\ строки\ в\ число} \\
+\mbox{}\textbf{function}\ \textbf{GetN}(S\ :\ string;\ \textbf{var}\ I\ :\ integer)\ :\ integer; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ R,J\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ R\ :=\ 0; \\
+\mbox{}\ \ J\ :=\ I; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{while}\ ((I\ \textless{}=\ \textbf{length}(S))\ \textbf{AND}\ (S[I]\ \textgreater{}=\ \texttt{'0'})\ \textbf{AND}\ (S[I]\ \textless{}=\ \texttt{'9'}))\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ R\ :=\ R*10\ +\ \textbf{ord}(S[I])\ -\ \$30;\ \textit{//\ ord('0');} \\
+\mbox{}\ \ \ \ \textbf{inc}(I); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\  \\
+\mbox{}\ \ \textbf{if}\ (J\ =\ I)\ \textbf{then} \\
+\mbox{}\ \ \ \ R\ :=\ 1; \\
+\mbox{} \\
+\mbox{}\ \ GetN\ :=\ R; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Формирует\ запись\ члена\ в\ многочлене} \\
+\mbox{}\textbf{function}\ \textbf{FormP}(P\ :\ PNode)\ :\ string; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ S\ :\ string; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ S\ :=\ \texttt{''}; \\
+\mbox{}\ \ \textit{//\ Если\ коэффициент\ перед\ членом\ не\ нулевой...} \\
+\mbox{}\ \ \textbf{if}\ ((P\ \textless{}\textgreater{}\ nil)\ \textbf{AND}\ (P\textasciicircum{}.C\ \textless{}\textgreater{}\ 0))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textit{//\ Если\ степень\ нулевая,\ то\ это\ просто\ константа} \\
+\mbox{}\ \ \ \ \textbf{if}\ (P\textasciicircum{}.P\ =\ 0)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ S\ :=\ \textbf{IntToStrM}(P\textasciicircum{}.C) \\
+\mbox{}\ \ \ \ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \textit{//\ Это\ не\ константа} \\
+\mbox{}\ \ \ \ \ \ \textit{//\ Если\ коэффициент\ не\ равен\ плюс/минус\ единице,\ запишем\ полностью} \\
+\mbox{}\ \ \ \ \ \ \textbf{if}\ (\textbf{Abs}(P\textasciicircum{}.C)\ \textless{}\textgreater{}\ 1)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ S\ :=\ \textbf{IntToStrM}(P\textasciicircum{}.C) \\
+\mbox{}\ \ \ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \ \ \textit{//\ Иначе\ возьмем\ только\ знак\ от\ него} \\
+\mbox{}\ \ \ \ \ \ \ \ S\ :=\ \textbf{IntToStrM}(P\textasciicircum{}.C)[1]; \\
+\mbox{}\ \ \ \ \ \ S\ +=\ P\textasciicircum{}.X; \\
+\mbox{}\ \ \ \ \ \ \textit{//\ Если\ степень\ не\ первая,\ допишем\ показатель\ степени} \\
+\mbox{}\ \ \ \ \ \ \textbf{if}\ (P\textasciicircum{}.P\ \textless{}\textgreater{}\ 1)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ S\ +=\ \texttt{'\textasciicircum{}'}\ +\ \textbf{IntToStr}(P\textasciicircum{}.P); \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ FormP\ :=\ S; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Записать\ многочлен} \\
+\mbox{}\textbf{procedure}\ \textbf{WriteP}(\textbf{var}\ F\ :\ \textbf{text};\ P\ :\ PNode); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ S\ :\ string; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ S\ :=\ \texttt{''}; \\
+\mbox{}\ \ \textbf{while}\ (P\ \textless{}\textgreater{}\ nil)\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ S\ +=\ \textbf{FormP}(P); \\
+\mbox{}\ \ \ \ P\ :=\ P\textasciicircum{}.N; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{if}\ (S\ \textless{}\textgreater{}\ \texttt{''})\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{if}\ (S[1]\ =\ \texttt{'+'})\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{Delete}(S,\ 1,\ 1); \\
+\mbox{}\ \ \ \ \textbf{writeln}(F,\ S); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Разбор\ многочлена} \\
+\mbox{}\textbf{procedure}\ \textbf{ParseP}(\textbf{var}\ P\ :\ PNode;\ S\ :\ string;\ I\ :\ integer); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ Sg\ :\ shortint; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (I\ \textless{}=\ \textbf{length}(S))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{New}(P); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textit{//\ Обрабатываем\ знак} \\
+\mbox{}\ \ \ \ \textbf{if}\ ((I\ =\ \textbf{length}(S))\ \textbf{AND}\ ((S[I]\ =\ \texttt{'+'})\ \textbf{OR}\ (S[I]\ =\ \texttt{'-'})))\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{Error}(\texttt{'Ошибка:\ знак\ должен\ стоять\ перед\ членом'},\ S,\ I) \\
+\mbox{}\ \ \ \ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ Sg\ :=\ 1; \\
+\mbox{}\ \ \ \ \ \ \textbf{if}\ (S[I]\ =\ \texttt{'-'})\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ Sg\ :=\ -1; \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{inc}(I); \\
+\mbox{}\ \ \ \ \ \ \textbf{end}\ \textbf{else}\ \textbf{if}\ (S[I]\ =\ \texttt{'+'})\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{inc}(I); \\
+\mbox{}\  \\
+\mbox{}\ \ \ \ \ \ \textit{//\ Обработаем\ коэффициент} \\
+\mbox{}\ \ \ \ \ \ P\textasciicircum{}.C\ :=\ Sg*\textbf{GetN}(S,\ I); \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textbf{if}\ (I\ \textless{}=\ \textbf{length}(S))\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{if}\ ((S[I]\ \textgreater{}=\ \texttt{'a'})\ \textbf{AND}\ (S[I]\ \textless{}=\ \texttt{'z'}))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ P\textasciicircum{}.X\ :=\ S[I]; \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{inc}(I); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{if}\ ((I\ \textless{}=\ \textbf{length}(S))\ \textbf{AND}\ (S[I]\ =\ \texttt{'\textasciicircum{}'}))\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{if}\ (I\ =\ \textbf{length}(S))\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \textbf{Error}(\texttt{'Ожидался\ показатель'},\ S,\ I) \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \textbf{inc}(I); \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \textbf{if}\ ((S[I]\ \textgreater{}=\ \texttt{'0'})\ \textbf{AND}\ (S[I]\ \textless{}=\ \texttt{'9'}))\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ P\textasciicircum{}.P\ :=\ \textbf{GetN}(S,\ I) \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{Error}(\texttt{'Неверный\ показатель'},\ S,\ I); \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{end}\ \textbf{else}\ \textbf{if}\ ((I\ \textless{}=\ \textbf{length}(S))\ \textbf{AND}\ (S[I]\ \textless{}\textgreater{}\ \texttt{'+'})\  \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textbf{AND}\ (S[I]\ \textless{}\textgreater{}\ \texttt{'-'}))\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \textbf{Error}(\texttt{'Ожидался\ знак\ операции'},\ S,\ I) \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ P\textasciicircum{}.P\ :=\ 1; \\
+\mbox{} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{ParseP}(P\textasciicircum{}.N,\ S,\ I); \\
+\mbox{}\ \ \ \ \ \ \textbf{end}\ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \ \ \textbf{Error}(\texttt{'Ожидался\ идентификатор'},\ S,\ I) \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \ \ \textit{//\ Это\ просто\ константа} \\
+\mbox{}\ \ \ \ \ \ P\textasciicircum{}.P\ :=\ 0; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Удалить\ пробелы\ из\ строки} \\
+\mbox{}\textbf{procedure}\ \textbf{Trim}(\textbf{var}\ S\ :\ String); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ i,\ j\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ i\ :=\ 1; \\
+\mbox{}\ \ j\ :=\ 1; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{while}\ (i\ \textless{}=\ \textbf{Length}(S))\ \textbf{do}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{if}\ (S[i]\ \textless{}\textgreater{}\ \texttt{'\ '})\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ S[j]\ :=\ S[i]; \\
+\mbox{}\ \ \ \ \ \ \textbf{inc}(j); \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \ \ \textbf{inc}(i); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{writeln}(i\ ,\ \texttt{'\ '},\ j); \\
+\mbox{}\ \ \textbf{if}\ (i\ \textless{}\textgreater{}\ j)\ \textbf{then} \\
+\mbox{}\ \ \ \ S\ :=\ \textbf{Copy}(S,\ 1,\ j-1); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Прочитать\ многочлен} \\
+\mbox{}\textbf{procedure}\ \textbf{ReadP}(\textbf{var}\ F\ :\ \textbf{text};\ \textbf{var}\ P\ :\ PNode); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ S\ :\ string; \\
+\mbox{}\ \ N\ :\ integer; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{readln}(F,\ S); \\
+\mbox{}\ \ \textbf{Trim}(S); \\
+\mbox{}\ \ N\ :=\ 0; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{if}\ (S\ \textless{}\textgreater{}\ \texttt{''})\ \textbf{then} \\
+\mbox{}\ \ \ \ \textbf{ParseP}(P,\ S,\ 1) \\
+\mbox{}\ \ \textbf{else} \\
+\mbox{}\ \ \ \ \textbf{Error}(\texttt{'Файл\ содержит\ пустую\ строку'},\ \texttt{''},\ N); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Освободить\ память\ из-под\ многочлена} \\
+\mbox{}\textbf{procedure}\ \textbf{FreeP}(\textbf{var}\ P\ :\ PNode); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (P\ \textless{}\textgreater{}\ nil)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{FreeP}(P\textasciicircum{}.N); \\
+\mbox{}\ \ \ \ \textbf{Dispose}(P); \\
+\mbox{}\ \ \ \ P\ :=\ nil; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Копирование\ элемента} \\
+\mbox{}\textbf{procedure}\ \textbf{CopyN}(P1\ :\ PNode;\ \textbf{var}\ P2\ :\ PNode;\ Sg\ :\ integer); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (P1\ \textless{}\textgreater{}\ nil)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{New}(P2); \\
+\mbox{}\ \ \ \ P2\textasciicircum{}.C\ :=\ P1\textasciicircum{}.C*Sg; \\
+\mbox{}\ \ \ \ P2\textasciicircum{}.P\ :=\ P1\textasciicircum{}.P; \\
+\mbox{}\ \ \ \ P2\textasciicircum{}.X\ :=\ P1\textasciicircum{}.X; \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Копирование\ списка} \\
+\mbox{}\textbf{procedure}\ \textbf{CopyP}(P1\ :\ PNode;\ \textbf{var}\ P2\ :\ PNode;\ Sg\ :\ integer); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ (P1\ \textless{}\textgreater{}\ nil)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{CopyN}(P1,\ P2,\ Sg); \\
+\mbox{}\ \ \ \ \textbf{CopyP}(P1\textasciicircum{}.N,\ P2\textasciicircum{}.N,\ Sg); \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Слияние} \\
+\mbox{}\textbf{procedure}\ \textbf{MergeP}(P1,\ P2\ :\ PNode;\ \textbf{var}\ P3\ :\ PNode;\ Sg\ :\ integer); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textit{//\ P1\ =\ nil\ AND\ P2\ =\ nil} \\
+\mbox{}\ \ \textbf{if}\ (P1\ \textless{}\textgreater{}\ P2)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{if}\ (P1\ =\ nil)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{CopyP}(P2,\ P3,\ Sg) \\
+\mbox{}\ \ \ \ \textbf{else}\ \textbf{if}\ (P2\ =\ nil)\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{CopyP}(P1,\ P3,\ 1) \\
+\mbox{}\ \ \ \ \textbf{else} \\
+\mbox{}\ \ \ \ \textit{//\ Выберем\ член\ с\ наибольшей\ степенью} \\
+\mbox{}\ \ \ \ \textbf{if}\ (P1\textasciicircum{}.P\ \textgreater{}\ P2\textasciicircum{}.P)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \textbf{CopyN}(P1,\ P3,\ 1); \\
+\mbox{}\ \ \ \ \ \ \textbf{MergeP}(P1\textasciicircum{}.N,\ P2,\ P3\textasciicircum{}.N,\ Sg) \\
+\mbox{}\ \ \ \ \textbf{end}\ \textbf{else}\ \textbf{if}\ (P1\textasciicircum{}.P\ \textless{}\ P2\textasciicircum{}.P)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \textbf{CopyN}(P2,\ P3,\ Sg); \\
+\mbox{}\ \ \ \ \ \ \textbf{MergeP}(P1,\ P2\textasciicircum{}.N,\ P3\textasciicircum{}.N,\ Sg) \\
+\mbox{}\ \ \ \ \textbf{end}\ \textbf{else}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \ \ \textit{//\ Степени\ равны,\ складываем\ коэффициенты} \\
+\mbox{}\ \ \ \ \ \ \textbf{CopyN}(P1,\ P3,\ 1); \\
+\mbox{}\ \ \ \ \ \ P3\textasciicircum{}.C\ +=\ Sg*P2\textasciicircum{}.C; \\
+\mbox{}\ \ \ \ \ \ \textbf{MergeP}(P1\textasciicircum{}.N,\ P2\textasciicircum{}.N,\ P3\textasciicircum{}.N,\ Sg); \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \  \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Сложение} \\
+\mbox{}\textbf{procedure}\ \textbf{AddP}(P1,\ P2\ :\ PNode;\ \textbf{var}\ P3\ :\ PNode); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{MergeP}(P1,\ P2,\ P3,\ 1); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Вычитание} \\
+\mbox{}\textbf{procedure}\ \textbf{SubP}(P1,\ P2\ :\ PNode;\ \textbf{var}\ P3\ :\ PNode); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{MergeP}(P1,\ P2,\ P3,\ -1); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ \textbf{Run}(S\ :\ string); \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ P1,\ P2,\ P3,\ P4\ :\ PNode; \\
+\mbox{}\ \ F\ :\ \textbf{text}; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ P1\ :=\ nil; \\
+\mbox{}\ \ P2\ :=\ nil; \\
+\mbox{}\ \ P3\ :=\ nil; \\
+\mbox{}\ \ P4\ :=\ nil; \\
+\mbox{} \\
+\mbox{}\ \ IsError\ :=\ \textbf{false}; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{assign}(F,\ S); \\
+\mbox{}\ \ \textbf{reset}(F); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{ReadP}(F,\ P1); \\
+\mbox{}\ \ \textbf{if}\ (\textbf{not}\ IsError)\ \textbf{then} \\
+\mbox{}\ \ \ \ \textbf{ReadP}(F,\ P2); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{if}\ (\textbf{not}\ IsError)\ \textbf{then}\ \textbf{begin} \\
+\mbox{}\ \ \ \ \textbf{AddP}(P1,\ P2,\ P3); \\
+\mbox{}\ \ \ \ \textbf{SubP}(P1,\ P2,\ P4); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textbf{append}(F); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textit{//\ WriteP(F,\ P1);} \\
+\mbox{}\ \ \ \ \textit{//\ WriteP(F,\ P2);} \\
+\mbox{}\ \ \ \ \textbf{WriteP}(F,\ P3); \\
+\mbox{}\ \ \ \ \textbf{WriteP}(F,\ P4); \\
+\mbox{} \\
+\mbox{}\ \ \ \ \textbf{writeln}(\texttt{'Задача\ успешно\ завершена'}); \\
+\mbox{}\ \ \textbf{end}\ \textbf{else} \\
+\mbox{}\ \ \ \ \textbf{writeln}(\texttt{'Выполнение\ задачи\ прервано\ из-за\ ошибки'}); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{close}(F); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{FreeP}(P1); \\
+\mbox{}\ \ \textbf{FreeP}(P2); \\
+\mbox{}\ \ \textbf{FreeP}(P3); \\
+\mbox{}\ \ \textbf{FreeP}(P4); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{function}\ \textbf{ToUp}(\textbf{var}\ C\ :\ char)\ :\ char; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{if}\ ((C\ \textgreater{}=\ \texttt{'a'})\ \textbf{AND}\ (C\ \textless{}=\ \texttt{'z'}))\ \textbf{then} \\
+\mbox{}\ \ \ \ C\ :=\ \textbf{chr}(\textbf{ord}(C)\ -\ \textbf{ord}(\texttt{'a'})\ +\ \textbf{ord}(\texttt{'A'})); \\
+\mbox{}\ \ ToUp\ :=\ C; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Диалог\ с\ пользователем} \\
+\mbox{}\textbf{procedure}\ RunDialog; \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ S\ :\ string; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ S\ :=\ \texttt{''}; \\
+\mbox{} \\
+\mbox{}\ \ \textbf{repeat} \\
+\mbox{}\ \ \ \ \textbf{if}\ (S\ \textless{}\textgreater{}\ \texttt{''})\ \textbf{then} \\
+\mbox{}\ \ \ \ \ \ \textbf{writeln}(\texttt{'Файл\ с\ именем\ '},\ S,\ \texttt{'\ не\ существует!'}); \\
+\mbox{}\ \ \ \ \textbf{write}(\texttt{'Введите\ имя\ файла\ данных\ (N\ для\ возврата\ на\ верхний\ уровень):\ '}); \\
+\mbox{}\ \ \ \ \textbf{readln}(S); \\
+\mbox{}\ \ \textbf{until}\ \textbf{FileExists}(S)\ \textbf{OR}\ (\textbf{ToUp}(S[1])\ =\ \texttt{'N'}); \\
+\mbox{} \\
+\mbox{}\ \ \textbf{if}\ (S\ \textless{}\textgreater{}\ \texttt{'N'})\ \textbf{then} \\
+\mbox{}\ \ \ \ \textbf{Run}(S); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{//\ Вывод\ справки} \\
+\mbox{}\textbf{procedure}\ Help; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{writeln}\ (\texttt{'Помощь:'}); \\
+\mbox{}\ \ \textbf{writeln}\ (\texttt{'\ '}:4,\ \texttt{'R\ -\ запустить\ алгоритм'}); \\
+\mbox{}\ \ \textbf{writeln}\ (\texttt{'\ '}:4,\ \texttt{'N\ -\ выход\ из\ программы'}); \\
+\mbox{}\ \ \textbf{writeln}\ (\texttt{'\ '}:4,\ \texttt{'H\ -\ эта\ подсказка'}); \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ C\ :\ char; \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ \textbf{repeat} \\
+\mbox{}\ \ \ \ \textbf{write}(\texttt{'Введите\ команду\ (H\ для\ справки):\ '}); \\
+\mbox{}\ \ \ \ \textbf{readln}(C); \\
+\mbox{}\ \ \ \ \textbf{toup}(C); \\
+\mbox{}\ \ \ \ \textbf{case}\ C\ \textbf{of} \\
+\mbox{}\ \ \ \ \ \ \texttt{'H'}\ :\ Help; \\
+\mbox{}\ \ \ \ \ \ \texttt{'R'}\ :\ RunDialog; \\
+\mbox{}\ \ \ \ \textbf{end}; \\
+\mbox{}\ \ \textbf{until}\ C\ =\ \texttt{'N'}; \\
+\mbox{}\textbf{end}. \\
+\mbox{} \\
+\mbox{}

@@ -1,0 +1,54 @@
+% Generator: GNU source-highlight, by Lorenzo Bettini, http://www.gnu.org/software/src-highlite
+\noindent
+\mbox{}unit\ Unit2; \\
+\mbox{} \\
+\mbox{}\textit{\{\$mode\ objfpc\}\{\$H+\}} \\
+\mbox{} \\
+\mbox{}interface \\
+\mbox{} \\
+\mbox{}\textbf{uses} \\
+\mbox{}\ \ Classes,\ SysUtils,\ FileUtil,\ Forms,\ Controls,\ Graphics,\ Dialogs, \\
+\mbox{}\ \ StdCtrls,\ LCLType,\ ExtCtrls; \\
+\mbox{} \\
+\mbox{}\textbf{type} \\
+\mbox{} \\
+\mbox{}\ \ \textit{\{\ TAboutBox\ \}} \\
+\mbox{} \\
+\mbox{}\ \ TAboutBox\ =\ \textbf{class}(TForm) \\
+\mbox{}\ \ \ \ AboutBoxLabel:\ TLabel; \\
+\mbox{}\ \ \ \ Button1:\ TButton; \\
+\mbox{}\ \ \ \ Image1:\ TImage; \\
+\mbox{}\ \ \ \ Memo1:\ TMemo; \\
+\mbox{}\ \ \ \ \textbf{procedure}\ \textbf{Button1Click}(Sender:\ TObject); \\
+\mbox{}\ \ private \\
+\mbox{}\ \ \ \ \textit{\{\ private\ declarations\ \}} \\
+\mbox{}\ \ public \\
+\mbox{}\ \ \ \ \textit{\{\ public\ declarations\ \}} \\
+\mbox{}\ \ \textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{var} \\
+\mbox{}\ \ AboutBox:\ TAboutBox; \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ \textbf{ShowError}(E\ :\ PChar); \\
+\mbox{} \\
+\mbox{}implementation \\
+\mbox{} \\
+\mbox{}\textit{\{\$R\ *.lfm\}} \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ \textbf{ShowError}(E\ :\ PChar); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ Application.\textbf{MessageBox}(E, \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \texttt{'Произошла\ ошибка'}, \\
+\mbox{}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ MB$\_$OK\ \textbf{OR}\ MB$\_$ICONERROR) \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textit{\{\ TAboutBox\ \}} \\
+\mbox{} \\
+\mbox{}\textbf{procedure}\ TAboutBox.\textbf{Button1Click}(Sender:\ TObject); \\
+\mbox{}\textbf{begin} \\
+\mbox{}\ \ Close; \\
+\mbox{}\textbf{end}; \\
+\mbox{} \\
+\mbox{}\textbf{end}. \\
+\mbox{} \\
+\mbox{}
